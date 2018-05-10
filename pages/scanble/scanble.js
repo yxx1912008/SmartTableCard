@@ -102,6 +102,11 @@ Page({
             success: function (res) {
               console.log(res);
             },
+          });
+          wx.closeBluetoothAdapter({
+            success: function (res) {
+
+            },
           })
         };
         console.log(res);
