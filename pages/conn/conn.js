@@ -54,9 +54,10 @@ Page({
 
     var that = this;
     var hex = 'AA5504B10000B5'
-    var typedArray = new Uint8Array(hex.match(/[\da-f]{2}/gi).map(function (h) {
-      return parseInt(h, 16)
-    }))
+    var typedArray = new Uint8Array(hex.match(/[\da-f]{2}/gi).map(
+      function (h) {
+        return parseInt(h, 16)
+      }));
     console.log(typedArray)
     console.log([0xAA, 0x55, 0x04, 0xB1, 0x00, 0x00, 0xB5])
     var buffer1 = typedArray.buffer
