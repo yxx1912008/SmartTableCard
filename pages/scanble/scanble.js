@@ -137,6 +137,7 @@ Page({
   //重新扫描蓝牙
   reflash: function () {
     this.setData({
+      list: null,
       showLoad: true,
       searchResult: false,
     });

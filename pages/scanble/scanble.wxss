@@ -16,5 +16,12 @@
 
 .scanFalsetext {
   font-size: 35rpx;
-  padding-top: 15rpx;
+}
+
+.reScan {
+  margin-top: 20rpx;
+}
+
+.btn-rescan {
+  margin-left: 40%;
 }
