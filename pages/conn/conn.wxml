@@ -1,5 +1,2 @@
-
-<button type="primary" bindtap="bindViewTap"> 发送指令 </button>
-
-
+<button class='sendCode' type="primary" bindtap="bindViewTap"> 发送二维码 </button>
 <view>结果：{{result}}</view>
