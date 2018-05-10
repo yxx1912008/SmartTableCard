@@ -23,8 +23,9 @@ Page({
     characteristics03: null,
     characteristics04: null,
     result: '',
-    isNull: true,
-
+    isConn: false,
+    showError: false,
+    disabled: true,
   },
   onLoad: function (opt) {
     var that = this;
@@ -49,6 +50,7 @@ Page({
    * 发送 数据到设备中
    */
   bindViewTap: function () {
+
 
     var that = this;
     var hex = 'AA5504B10000B5'
@@ -254,11 +256,20 @@ Page({
           message: '蓝牙设备连接失败',
           selector: '#zan-toast-test'
         });
-      },
-      complete: function (res) {
-        // complete
+        that.setData({
+          isConn: true,
+          showError: true,
+        });
+
+        //如果连接失败，返回上级列表
+        setTimeout(function () {
+          wx.navigateBack({
+
+          })
+        }, 3000);
+
       }
-    })
+    });
   },
 
 

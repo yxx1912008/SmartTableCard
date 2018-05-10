@@ -1,3 +1,13 @@
 .sendCode {
   margin-top: 40%;
 }
+
+.loading {
+  width: 100%;
+  text-align: center;
+}
+
+.zan-card__detail {
+  text-align: center;
+  font-size: 35rpx;
+}

@@ -2,6 +2,26 @@
 <zan-toast id="zan-toast-test"></zan-toast>
 
 <doc-page title="发送二维码" without-padding>
-  <button class='sendCode' type="primary" bindtap="bindViewTap"> 发送二维码 </button>
+  <!-- 1.判断蓝牙是否连接成功 -->
+  <view id='isConn' wx:if='{{!isConn}}' class='loading'>
+    <view class="zan-panel loading-example no-flex">
+      <zan-loading type="dot"></zan-loading>
+      <view>正在连接设备...</view>
+      <zan-loading type="dot" color="black"></zan-loading>
+    </view>
+  </view>
+
+  <!-- 2.蓝牙连接失败提示 -->
+  <view wx:if='{{showError}}'>
+    <zan-card card-class="test-card" useDetailSlot="{{ true }}" thumb="/dist/static/images/error.png">
+      <!-- 右侧详情 -->
+      <view slot="detail-slot" class="zan-card__detail">
+        <text id='scanFalsetext'>\n链接失败 \n 请检查蓝牙状态</text>
+      </view>
+    </zan-card>
+  </view>
+
+
+  <button disabled='{{disabled}}' class='sendCode' type="primary" bindtap="bindViewTap"> 发送二维码 </button>
   <view>结果：{{result}}</view>
 </doc-page>
