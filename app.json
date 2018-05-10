@@ -1,12 +1,15 @@
 {
-  "pages":[
+  "pages": [
     "pages/index/index",
-    "pages/logs/logs"
+    "pages/scanble/scanble",
+    "pages/conn/conn"
   ],
-  "window":{
-    "backgroundTextStyle":"light",
-    "navigationBarBackgroundColor": "#fff",
-    "navigationBarTitleText": "WeChat",
-    "navigationBarTextStyle":"black"
+  "window": {
+    "navigationBarBackgroundColor": "#FAFAFA",
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "智能台牌",
+    "backgroundColor": "#f9f9f9",
+    "backgroundTextStyle": "dark",
+    "enablePullDownRefresh": true
   }
 }

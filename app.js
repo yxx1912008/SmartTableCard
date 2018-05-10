@@ -34,6 +34,8 @@ App({
     })
   },
   globalData: {
-    userInfo: null
+    userInfo: null,
+    //扫描识别二维码的内容
+    codeBody: null
   }
 })
