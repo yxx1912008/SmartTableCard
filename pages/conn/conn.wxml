@@ -1,2 +1,7 @@
-<button class='sendCode' type="primary" bindtap="bindViewTap"> 发送二维码 </button>
-<view>结果：{{result}}</view>
+<!-- 框架吐司 -->
+<zan-toast id="zan-toast-test"></zan-toast>
+
+<doc-page title="发送二维码" without-padding>
+  <button class='sendCode' type="primary" bindtap="bindViewTap"> 发送二维码 </button>
+  <view>结果：{{result}}</view>
+</doc-page>

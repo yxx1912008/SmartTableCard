@@ -1,4 +1,5 @@
 const app = getApp();
+const Toast = require('../../dist/zan-ui/toast/toast.js');
 
 /**
  * 连接设备。获取数据
@@ -48,6 +49,7 @@ Page({
    * 发送 数据到设备中
    */
   bindViewTap: function () {
+
     var that = this;
     var hex = 'AA5504B10000B5'
     var typedArray = new Uint8Array(hex.match(/[\da-f]{2}/gi).map(function (h) {
@@ -247,6 +249,11 @@ Page({
       },
       fail: function (res) {
         // fail
+        Toast({
+          type: "fail",
+          message: '蓝牙设备连接失败',
+          selector: '#zan-toast-test'
+        });
       },
       complete: function (res) {
         // complete

@@ -24,7 +24,10 @@ Page({
     console.log(e.currentTarget.dataset.advertisData);
     var title = e.currentTarget.dataset.title;
     var name = e.currentTarget.dataset.name;
-    wx.redirectTo({
+    // wx.redirectTo({
+    //   url: '../conn/conn?deviceId=' + title + '&name=' + name,
+    // })
+    wx.navigateTo({
       url: '../conn/conn?deviceId=' + title + '&name=' + name,
     })
   },
