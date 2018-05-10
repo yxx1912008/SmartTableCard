@@ -3,6 +3,6 @@
     "zan-button": "../../dist/zan-ui/btn/index",
     "zan-button-group": "../../dist/zan-ui/btn-group/index",
     "zan-panel": "../../dist/zan-ui/panel/index",
-    "zan-toptips": "../../dist/zan-ui/toptips/index"
+    "zan-toast": "../../dist/zan-ui/toast/index"
   }
 }

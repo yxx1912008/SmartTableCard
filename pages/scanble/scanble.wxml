@@ -1,12 +1,45 @@
-<view>
-  设备列表</view>
+<doc-page title="设备列表" without-padding>
 
-<view wx:for="{{list}}" wx:for-item="item" data-title="{{item.deviceId}}" data-name="{{item.name}}" data-advertisData="{{item.advertisServiceUUIDs}}" wx:key="{{item.deviceId}}" bindtap="bindViewTap">
-  <view class="item">
-    {{item.deviceId}} -----{{item.name}}
-    <view class="ss" />
+  <!-- 1.判断列表是否为空 -->
+  <view id='isListNull' wx:if='{{showLoad}}' class='loading'>
+    <view class="zan-panel loading-example no-flex">
+      <zan-loading type="dot"></zan-loading>
+      <view>正在搜索...</view>
+      <zan-loading type="dot" color="black"></zan-loading>
+    </view>
   </view>
+
+  <!-- 搜索失败提示 -->
+  <view wx:if='{{searchResult}}'>
+    <zan-card card-class="test-card" useDetailSlot="{{ true }}" thumb="/dist/static/images/error.png">
+      <!-- 右侧详情 -->
+      <view slot="detail-slot" class="zan-card__detail">
+        <text id='scanFalsetext'>\n扫描失败 \n 请重新扫描</text>
+      </view>
+    </zan-card>
+  </view>
+
+
+
+  <view wx:for="{{list}}" wx:for-item="item" data-title="{{item.deviceId}}" data-name="{{item.name}}" data-advertisData="{{item.advertisServiceUUIDs}}" wx:key="{{item.deviceId}}" bindtap="bindViewTap">
+    <view class="item">
+      {{item.deviceId}} -----{{item.name}}
+      <view class="ss" />
+    </view>
+
+  </view>
+  <!-- 卡片视图 -->
+  <zan-card card-class="test-card" thumb="/dist/static/images/Bluetooth.png" price="999.99" title="红烧牛肉【虚拟商品】【有库存】【有sku】" num="2" desc="3000克 50%" status="已发货">
+  </zan-card>
   <view>
     <button type="primary" size="mini" bindtap="reflash"> 重新扫描 </button>
   </view>
-</view>
+  <zan-toast id="zan-toast-test"></zan-toast>
+
+
+
+
+
+
+
+</doc-page>

@@ -9,8 +9,7 @@
     </block>
   </view>
   <view class="usermotto">
-
     <zan-button type="primary" bindtap='scanCode'>扫码</zan-button>
   </view>
-
+  <zan-toast id="zan-toast-test"></zan-toast>
 </view>

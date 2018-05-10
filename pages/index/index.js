@@ -2,7 +2,7 @@
 //index.js
 //获取应用实例
 const app = getApp()
-
+const Toast = require('../../dist/zan-ui/toast/toast.js');
 Page({
   data: {
     motto: 'Hello World',
@@ -61,9 +61,11 @@ Page({
         })
       },
       fail: res => {
-        wx.showToast({
-          title: '二维码识别失败',
-        })
+        Toast({
+          type: 'fail',
+          message: '二维码识别失败',
+          selector: '#zan-toast-test'
+        });
       }
     });
   },

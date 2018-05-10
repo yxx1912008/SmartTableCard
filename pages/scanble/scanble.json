@@ -1,3 +1,11 @@
 {
-    "navigationBarTitleText": "搜索设备"
+  "navigationBarTitleText": "搜索设备",
+  "usingComponents": {
+    "zan-card": "../../dist/zan-ui/card/index",
+    "zan-toast": "../../dist/zan-ui/toast/index",
+    "zan-panel": "../../dist/zan-ui/panel/index",
+    "zan-capsule": "../../dist/zan-ui/capsule/index",
+    "doc-page": "../../components/doc-page/index",
+    "zan-loading": "../../dist/zan-ui/loading/index"
+  }
 }
