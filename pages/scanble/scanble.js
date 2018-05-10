@@ -22,20 +22,10 @@ Page({
     console.log(e.currentTarget.dataset.title);
     console.log(e.currentTarget.dataset.name);
     console.log(e.currentTarget.dataset.advertisData);
-
     var title = e.currentTarget.dataset.title;
     var name = e.currentTarget.dataset.name;
     wx.redirectTo({
       url: '../conn/conn?deviceId=' + title + '&name=' + name,
-      success: function (res) {
-        // success
-      },
-      fail: function (res) {
-        // fail
-      },
-      complete: function (res) {
-        // complete
-      }
     })
   },
 

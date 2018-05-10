@@ -35,6 +35,13 @@
       <zan-button class='btn-rescan' type="primary" size='small' bindtap="reflash">重新扫描</zan-button>
     </view>
 
+    <!-- 待删除 -->
+    <view bindtap='bindViewTap'>
+      <zan-card card-class="test-card" thumb="/dist/static/images/Bluetooth.png" title="{{item.name}}" desc="设备ID:555" status="信号强度:强">
+      </zan-card>
+    </view>
+
+
   </view>
 
 

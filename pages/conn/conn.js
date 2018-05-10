@@ -1,10 +1,11 @@
+const app = getApp();
 
 /**
  * 连接设备。获取数据
  */
 Page({
   data: {
-    motto: 'Hello World',
+    motto: app.globalData.codeBody,
     userInfo: {},
     deviceId: '',
     name: '',
@@ -32,13 +33,60 @@ Page({
     that.setData({ deviceId: opt.deviceId });
     /**
      * 监听设备的连接状态
+     * 该方法回调中可以用于处理连接意外断开等异常情况
      */
     wx.onBLEConnectionStateChanged(function (res) {
       console.log(`device ${res.deviceId} state has changed, connected: ${res.connected}`)
+    });
+    //TODO 链接蓝牙设备
+    setTimeout(function () {
+      that.connectBLT();
+    }, 2000);
+  },
+
+  /**
+   * 发送 数据到设备中
+   */
+  bindViewTap: function () {
+    var that = this;
+    var hex = 'AA5504B10000B5'
+    var typedArray = new Uint8Array(hex.match(/[\da-f]{2}/gi).map(function (h) {
+      return parseInt(h, 16)
+    }))
+    console.log(typedArray)
+    console.log([0xAA, 0x55, 0x04, 0xB1, 0x00, 0x00, 0xB5])
+    var buffer1 = typedArray.buffer
+    console.log(buffer1)
+    wx.writeBLECharacteristicValue({
+      deviceId: that.data.deviceId,
+      serviceId: that.data.serviceId,
+      characteristicId: that.data.cd20,
+      value: buffer1,
+      success: function (res) {
+        // success
+        console.log("success  指令发送成功");
+        console.log(res);
+      },
+      fail: function (res) {
+        // fail
+        console.log(res);
+      },
+      complete: function (res) {
+        // complete
+      }
     })
+
+  },
+  buf2hex: function (buffer) { // buffer is an ArrayBuffer
+    return Array.prototype.map.call(new Uint8Array(buffer), x => ('00' + x.toString(16)).slice(-2)).join('');
+  },
+
+  //连接指定蓝牙设备
+  connectBLT: function () {
+    var that = this;
     /**
-     * 连接设备
-     */
+   * 连接设备
+   */
     wx.createBLEConnection({
       deviceId: that.data.deviceId,
       success: function (res) {
@@ -206,40 +254,5 @@ Page({
     })
   },
 
-  /**
-   * 发送 数据到设备中
-   */
-  bindViewTap: function () {
-    var that = this;
-    var hex = 'AA5504B10000B5'
-    var typedArray = new Uint8Array(hex.match(/[\da-f]{2}/gi).map(function (h) {
-      return parseInt(h, 16)
-    }))
-    console.log(typedArray)
-    console.log([0xAA, 0x55, 0x04, 0xB1, 0x00, 0x00, 0xB5])
-    var buffer1 = typedArray.buffer
-    console.log(buffer1)
-    wx.writeBLECharacteristicValue({
-      deviceId: that.data.deviceId,
-      serviceId: that.data.serviceId,
-      characteristicId: that.data.cd20,
-      value: buffer1,
-      success: function (res) {
-        // success
-        console.log("success  指令发送成功");
-        console.log(res);
-      },
-      fail: function (res) {
-        // fail
-        console.log(res);
-      },
-      complete: function (res) {
-        // complete
-      }
-    })
 
-  },
-  buf2hex: function (buffer) { // buffer is an ArrayBuffer
-    return Array.prototype.map.call(new Uint8Array(buffer), x => ('00' + x.toString(16)).slice(-2)).join('');
-  }
 })
