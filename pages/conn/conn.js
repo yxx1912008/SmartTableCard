@@ -50,8 +50,6 @@ Page({
    * 发送 数据到设备中
    */
   bindViewTap: function () {
-
-
     var that = this;
     var hex = 'AA5504B10000B5'
     var typedArray = new Uint8Array(hex.match(/[\da-f]{2}/gi).map(
@@ -244,7 +242,7 @@ Page({
                 }, fail: function (res) {
                   console.log(res);
                 }
-              })
+              });
             }
               , 1500);
           }
@@ -272,6 +270,12 @@ Page({
       }
     });
   },
+  // 获取设备的特征值
+  getCharacteristics: function () {
+
+
+
+  }
 
 
 })
