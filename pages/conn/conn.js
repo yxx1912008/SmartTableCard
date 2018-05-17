@@ -152,6 +152,8 @@ Page({
           }
         }
         console.log(`获取蓝牙使能UUID成功,使能uuid:${that.data.notycharacteristicsId},写入UUID：${that.data.characteristicsId}`);
+        //使能事件
+        that.notycharacteristicsId();
       }, fail: res => {
         console.log('获取特征值失败');
         that.ifError();
@@ -159,6 +161,39 @@ Page({
     });
   },
 
+  //4.操作使能事件
+  notycharacteristicsId: function () {
+    var that = this;
+    var recvValueAscii = "";
+    var stringValue = "";
+    var recveValue = "";
+
+    wx.notifyBLECharacteristicValueChange({
+      deviceId: that.data.deviceId,
+      serviceId: that.data.serviceId,
+      characteristicId: that.data.notycharacteristicsId,
+      state: true,
+      success: function (res) {
+        console.log('调用蓝牙使能成功:', res);
+        
+        wx.onBLECharacteristicValueChange(function (res) {
+
+        })
+
+
+
+
+
+      },
+      fail: res => {
+        console.log('调用蓝牙使能失败');
+        that.ifError();
+      }
+    });
+
+
+
+  },
   /**
    * 发送 数据到设备中
    */
