@@ -7,21 +7,13 @@ const Toast = require('../../dist/zan-ui/toast/toast.js');
 Page({
   data: {
     motto: app.globalData.codeBody,
-    userInfo: {},
     deviceId: '',
+    deviceName: '',
     name: '',
     serviceId: '',
     services: [],
-    cd20: '',
-    cd01: '',
-    cd02: '',
-    cd03: '',
-    cd04: '',
-    characteristics20: null,
-    characteristics01: null,
-    characteristics02: null,
-    characteristics03: null,
-    characteristics04: null,
+    notycharacteristicsId: '',
+    characteristicsId: '',
     result: '',
     isConn: false,
     showError: false,
@@ -29,10 +21,9 @@ Page({
   },
   onLoad: function (opt) {
     var that = this;
-    console.log("onLoad");
-    console.log('deviceId=' + opt.deviceId);
-    console.log('name=' + opt.name);
-    that.setData({ deviceId: opt.deviceId });
+    console.log(`开始连接蓝牙:设备ID:${opt.deviceId},设备名称:${opt.name}`);
+    //设置当前蓝牙的名称与ID
+    that.setData({ deviceId: opt.deviceId, deviceName: opt.name });
     /**
      * 监听设备的连接状态
      * 该方法回调中可以用于处理连接意外断开等异常情况
@@ -44,6 +35,128 @@ Page({
     setTimeout(function () {
       that.connectBLT();
     }, 2000);
+  },
+
+  //1.连接指定蓝牙设备
+  connectBLT: function () {
+    var that = this;
+    /**
+   * 连接设备
+   */
+    wx.createBLEConnection({
+      deviceId: that.data.deviceId,
+      success: function (res) {
+        // success
+        console.log("创建蓝牙低功耗连接成功", res);
+        //关闭正在连接的动画
+        that.setData({
+          isConn: true,
+          showError: false,
+        });
+        //获取服务的UUID
+        var flag = that.getUUID();
+      },
+      fail: function (res) {
+        console.log(res);
+        // fail
+        Toast({
+          type: "fail",
+          message: '蓝牙设备连接失败',
+          selector: '#zan-toast-test'
+        });
+        that.setData({
+          isConn: true,
+          showError: true,
+        });
+        that.ifError();
+      }
+    });
+  },
+  //2.获取服务的UUID
+  getUUID: function () {
+    var that = this;
+    wx.getBLEDeviceServices({
+      deviceId: that.data.deviceId,
+      success: function (res) {
+        console.log('获取服务成功', res);
+        //获取所有的服务UUID
+        var allUUID = res.services;
+        //蓝牙支持的服务数量
+        var serviceLength = allUUID.length;
+        for (var index = 0; index < serviceLength; index++) {
+          var tempUUID = allUUID[index].uuid.slice(4, 8);
+          //判断是否是我们需要的服务UUID
+          if (tempUUID == 'FEE0' || tempUUID == 'fee0') {
+            var indexUUID = index;
+            that.setData({
+              //确定需要的服务UUID
+              serviceId: allUUID[indexUUID].uuid
+            });
+          }
+        }
+        console.log('需要连接的服务UUID:', that.data.serviceId);
+        //获取特征值
+        that.getCharacteristics();
+      },
+      fail: res => {
+        console.log(res);
+        Toast({
+          type: "fail",
+          message: '蓝牙服务获取失败',
+          selector: '#zan-toast-test'
+        });
+        that.setData({
+          isConn: true,
+          showError: true,
+        });
+        that.ifError();
+      }
+    });
+  },
+
+  //3.获取特征值
+  getCharacteristics: function () {
+    console.log('开始获取特征值');
+    var that = this;
+    //设备特征值列表
+    var deviceCharacteres = [];
+    var characteristicsUUID = {};
+    //开始获取设备特征值
+    wx.getBLEDeviceCharacteristics({
+      deviceId: that.data.deviceId,
+      serviceId: that.data.serviceId,
+      success: function (res) {
+        console.log('获取到的特征值为：', res);
+        //获取所有的特征值
+        var characteristics = res.characteristics;
+        //特征值数组的长度
+        var characteristicsLength = characteristics.length;
+        //遍历数组获取蓝牙使能UUID
+        for (var i = 0; i < characteristicsLength; i++) {
+          var notyCharacteristicsUUID = characteristics[i].uuid.slice(4, 8);
+          if (notyCharacteristicsUUID == 'FEE1' || notyCharacteristicsUUID == 'fee1') {
+            that.setData({
+              characteristicsId: characteristics[i].uuid,
+              notycharacteristicsId: characteristics[i].uuid,
+            });
+          }
+        }
+        //遍历数组获取蓝牙写入UUID
+        for (var i = 0; i < characteristicsLength; i++) {
+          var notyCharacteristicsUUID = characteristics[i].uuid.slice(4, 8);
+          //如果是我们需要的写入ID
+          if (notyCharacteristicsUUID == 'FEE2' || notyCharacteristicsUUID == 'fee2') {
+            that.setData({
+              characteristicsId: characteristics[i].uuid,
+            });
+          }
+        }
+        console.log(`获取蓝牙使能UUID成功,使能uuid:${that.data.notycharacteristicsId},写入UUID：${that.data.characteristicsId}`);
+      }, fail: res => {
+        console.log('获取特征值失败');
+        that.ifError();
+      }
+    });
   },
 
   /**
@@ -77,204 +190,20 @@ Page({
       complete: function (res) {
         // complete
       }
-    })
-
+    });
   },
   buf2hex: function (buffer) { // buffer is an ArrayBuffer
     return Array.prototype.map.call(new Uint8Array(buffer), x => ('00' + x.toString(16)).slice(-2)).join('');
   },
 
-  //连接指定蓝牙设备
-  connectBLT: function () {
-    var that = this;
-    /**
-   * 连接设备
-   */
-    wx.createBLEConnection({
-      deviceId: that.data.deviceId,
-      success: function (res) {
-        // success
-        console.log(res);
-        /**
-         * 连接成功，后开始获取设备的服务列表
-         */
-        wx.getBLEDeviceServices({
-          // 这里的 deviceId 需要在上面的 getBluetoothDevices中获取
-          deviceId: that.data.deviceId,
-          success: function (res) {
-            console.log('device services:', res.services)
-            that.setData({ services: res.services });
-            console.log('device services:', that.data.services[1].uuid);
-            that.setData({ serviceId: that.data.services[1].uuid });
-            console.log('--------------------------------------');
-            console.log('device设备的id:', that.data.deviceId);
-            console.log('device设备的服务id:', that.data.serviceId);
-            /**
-             * 延迟3秒，根据服务获取特征 
-             */
-            setTimeout(function () {
-              wx.getBLEDeviceCharacteristics({
-                // 这里的 deviceId 需要在上面的 getBluetoothDevices
-                deviceId: that.data.deviceId,
-                // 这里的 serviceId 需要在上面的 getBLEDeviceServices 接口中获取
-                serviceId: that.data.serviceId,
-                success: function (res) {
-                  console.log('000000000000' + that.data.serviceId);
-                  console.log('device getBLEDeviceCharacteristics:', res.characteristics)
-                  for (var i = 0; i < 5; i++) {
-                    if (res.characteristics[i].uuid.indexOf("cd20") != -1) {
-                      that.setData({
-                        cd20: res.characteristics[i].uuid,
-                        characteristics20: res.characteristics[i]
-                      });
-                    }
-                    if (res.characteristics[i].uuid.indexOf("cd01") != -1) {
-                      that.setData({
-                        cd01: res.characteristics[i].uuid,
-                        characteristics01: res.characteristics[i]
-                      });
-                    }
-                    if (res.characteristics[i].uuid.indexOf("cd02") != -1) {
-                      that.setData({
-                        cd02: res.characteristics[i].uuid,
-                        characteristics02: res.characteristics[i]
-                      });
-                    } if (res.characteristics[i].uuid.indexOf("cd03") != -1) {
-                      that.setData({
-                        cd03: res.characteristics[i].uuid,
-                        characteristics03: res.characteristics[i]
-                      });
-                    }
-                    if (res.characteristics[i].uuid.indexOf("cd04") != -1) {
-                      that.setData({
-                        cd04: res.characteristics[i].uuid,
-                        characteristics04: res.characteristics[i]
-                      });
-                    }
-                  }
-                  console.log('cd01= ' + that.data.cd01 + 'cd02= ' + that.data.cd02 + 'cd03= ' + that.data.cd03 + 'cd04= ' + that.data.cd04 + 'cd20= ' + that.data.cd20);
-                  /**
-                   * 回调获取 设备发过来的数据
-                   */
-                  wx.onBLECharacteristicValueChange(function (characteristic) {
-                    console.log('characteristic value comed:', characteristic.value)
-                    //{value: ArrayBuffer, deviceId: "D8:00:D2:4F:24:17", serviceId: "ba11f08c-5f14-0b0d-1080-007cbe238851-0x600000460240", characteristicId: "0000cd04-0000-1000-8000-00805f9b34fb-0x60800069fb80"}
-                    /**
-                     * 监听cd04cd04中的结果
-                     */
-                    if (characteristic.characteristicId.indexOf("cd01") != -1) {
-                      const result = characteristic.value;
-                      const hex = that.buf2hex(result);
-                      console.log(hex);
-                    }
-                    if (characteristic.characteristicId.indexOf("cd04") != -1) {
-                      const result = characteristic.value;
-                      const hex = that.buf2hex(result);
-                      console.log(hex);
-                      that.setData({ result: hex });
-                    }
+  //出错操作，直接返回上一层
+  ifError: res => {
+    //如果连接失败，返回上级列表
+    setTimeout(function () {
+      wx.navigateBack({
 
-                  })
-                  /**
-                   * 顺序开发设备特征notifiy
-                   */
-                  wx.notifyBLECharacteristicValueChanged({
-                    deviceId: that.data.deviceId,
-                    serviceId: that.data.serviceId,
-                    characteristicId: that.data.cd01,
-                    state: true,
-                    success: function (res) {
-                      // success
-                      console.log('notifyBLECharacteristicValueChanged success', res);
-                    },
-                    fail: function (res) {
-                      // fail
-                    },
-                    complete: function (res) {
-                      // complete
-                    }
-                  })
-                  wx.notifyBLECharacteristicValueChanged({
-                    deviceId: that.data.deviceId,
-                    serviceId: that.data.serviceId,
-                    characteristicId: that.data.cd02,
-                    state: true,
-                    success: function (res) {
-                      // success
-                      console.log('notifyBLECharacteristicValueChanged success', res);
-                    },
-                    fail: function (res) {
-                      // fail
-                    },
-                    complete: function (res) {
-                      // complete
-                    }
-                  })
-                  wx.notifyBLECharacteristicValueChanged({
-                    deviceId: that.data.deviceId,
-                    serviceId: that.data.serviceId,
-                    characteristicId: that.data.cd03,
-                    state: true,
-                    success: function (res) {
-                      // success
-                      console.log('notifyBLECharacteristicValueChanged success', res);
-                    },
-                    fail: function (res) {
-                      // fail
-                    },
-                    complete: function (res) {
-                      // complete
-                    }
-                  })
-
-                  wx.notifyBLECharacteristicValueChanged({
-                    // 启用 notify 功能
-                    // 这里的 deviceId 需要在上面的 getBluetoothDevices 或 onBluetoothDeviceFound 接口中获取
-                    deviceId: that.data.deviceId,
-                    serviceId: that.data.serviceId,
-                    characteristicId: that.data.cd04,
-                    state: true,
-                    success: function (res) {
-                      console.log('notifyBLECharacteristicValueChanged success', res)
-                    }
-                  })
-
-                }, fail: function (res) {
-                  console.log(res);
-                }
-              });
-            }
-              , 1500);
-          }
-        })
-      },
-      fail: function (res) {
-        // fail
-        Toast({
-          type: "fail",
-          message: '蓝牙设备连接失败',
-          selector: '#zan-toast-test'
-        });
-        that.setData({
-          isConn: true,
-          showError: true,
-        });
-
-        //如果连接失败，返回上级列表
-        setTimeout(function () {
-          wx.navigateBack({
-
-          })
-        }, 3000);
-
-      }
-    });
-  },
-  // 获取设备的特征值
-  getCharacteristics: function () {
-
-
-
+      })
+    }, 3000);
   }
 
 

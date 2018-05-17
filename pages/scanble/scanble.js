@@ -21,7 +21,6 @@ Page({
   bindViewTap: function (e) {
     console.log(e.currentTarget.dataset.title);
     console.log(e.currentTarget.dataset.name);
-    console.log(e.currentTarget.dataset.advertisData);
     var title = e.currentTarget.dataset.title;
     var name = e.currentTarget.dataset.name;
     // wx.redirectTo({
@@ -103,11 +102,6 @@ Page({
               console.log(res);
             },
           });
-          wx.closeBluetoothAdapter({
-            success: function (res) {
-
-            },
-          })
         };
         console.log(res);
         that.setData({
