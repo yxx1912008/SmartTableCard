@@ -13,7 +13,13 @@ const formatNumber = n => {
   n = n.toString()
   return n[1] ? n : '0' + n
 }
+/* ArrayBuffer类型数据转为16进制字符串 */
+const buf2hex = buffer => { // buffer is an ArrayBuffer
+  console.log('接收的数据为', buffer);
+  return Array.prototype.map.call(new Uint8Array(buffer), x => ('00' + x.toString(16)).slice(-2)).join('');
+}
 
 module.exports = {
-  formatTime: formatTime
+  formatTime: formatTime,
+  buf2hex: buf2hex
 }

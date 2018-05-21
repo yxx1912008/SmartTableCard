@@ -1,6 +1,6 @@
 const app = getApp();
 const Toast = require('../../dist/zan-ui/toast/toast.js');
-
+const utils = require('../../utils/util.js')
 /**
  * 连接设备。获取数据
  */
@@ -15,6 +15,7 @@ Page({
     notycharacteristicsId: '',
     characteristicsId: '',
     result: '',
+    recvValue: '',
     isConn: false,
     showError: false,
     disabled: true,
@@ -175,62 +176,173 @@ Page({
       state: true,
       success: function (res) {
         console.log('调用蓝牙使能成功:', res);
-        
+        //解除按钮置灰
+        that.setData({
+          disabled: false
+        });
         wx.onBLECharacteristicValueChange(function (res) {
-
-        })
-
-
-
-
-
+          var lengthHex = [];
+          var turnBack = "";
+          var result = res.value;
+          console.log(result);
+          var hex = utils.buf2hex(result);
+          console.log('设备返回来的值', hex);
+          var fHex = hex;
+          var lengthSoy = fHex.length / 2;
+          var length = Math.round(lengthSoy);
+          for (var i = 0; i < length; i++) {
+            var hexSpalit = fHex.slice(0, 2);
+            lengthHex.push(hexSpalit);
+            fHex = fHex.substring(2);
+          }
+          console.log('length hex', lengthHex);
+          for (var j = 0; j < lengthHex.length; j++) {
+            var integar = lengthHex[j];    //十六进制
+            recveValue = parseInt(integar, 16);    //十进制
+            console.log('recveValue', recveValue);
+            turnBack = turnBack + String.fromCharCode(recveValue);
+            console.log('turnBack', turnBack);
+          }
+          console.log('最终转回来的值', turnBack)
+          that.setData({
+            result: that.data.result + turnBack
+          });
+        });
       },
       fail: res => {
         console.log('调用蓝牙使能失败');
         that.ifError();
       }
     });
-
-
-
   },
   /**
    * 发送 数据到设备中
    */
   bindViewTap: function () {
     var that = this;
-    var hex = 'AA5504B10000B5'
-    var typedArray = new Uint8Array(hex.match(/[\da-f]{2}/gi).map(
-      function (h) {
-        return parseInt(h, 16)
-      }));
-    console.log(typedArray)
-    console.log([0xAA, 0x55, 0x04, 0xB1, 0x00, 0x00, 0xB5])
-    var buffer1 = typedArray.buffer
-    console.log(buffer1)
+    var writeArray = [];
+    var charCodeAt = [];
+    var valueAscii = "";
+    var recvValueAscii = "";
+    var stringValue = "";
+    var recveValue = "";
+    var valueInitialOne = app.globalData.codeBody;       //拿到输入框的值
+    console.log('输入框中的值', valueInitialOne);
+    /* 判断是否存在空格 */
+    if (valueInitialOne.indexOf(' ') > 0) {
+      var valueInitial = that.splitStr(valueInitialOne, ' ');    //存在空格时
+      console.log('删除掉空格', valueInitial);
+    } else {
+      var valueInitial = valueInitialOne;    //不存在空格时
+    }
+    /* 判断字节是否超过20字节 */
+    if (valueInitial.length > 20) {     //当字节超过20的时候，采用分段发送
+      //选择Ascii码发送
+      var value_split = valueInitial.split('');  //将字符一个一个分开
+      console.log('value_split', value_split);
+      for (var i = 0; i < value_split.length; i++) {
+        valueAscii = valueAscii + value_split[i].charCodeAt().toString(16);     //转为Ascii字符后连接起
+      }
+      var recveValue = valueAscii;
+      console.log('转为Ascii码值', recveValue);
+      console.log('recveValue的长度', recveValue.length)
+      var Ascii_send_time = Math.ceil(recveValue.length / 20);
+      console.log('Ascii发送的次数', Ascii_send_time);
+      for (var i = 0; i < Ascii_send_time; i++) {
+        if (recveValue.length > 20) {
+          var value = recveValue.slice(0, 20);
+          console.log('截取到的值', value);
+          recveValue = recveValue.substring(20);
+          console.log('此时剩下的recveValue', recveValue);
+          writeArray.push(value);        //放在数组里面
+        } else {
+          var value = recveValue;
+          writeArray.push(recveValue);        //放在数组里面
+        }
+      }
+      console.log('数组writeArray', writeArray);
+      writeArray.map(function (val, index) {
+        setTimeout(function () {
+          var value_set = val;
+          console.log('value_set', value_set);
+          var write_function = that.write(value_set);       //调用数据发送函数
+        }, index * 100)
+      });
+    } else {
+      //当字节不超过20的时候，直接发送
+      /* 当选择以Ascii字符发送的时候 */
+      var value_split = valueInitial.split('');  //将字符一个一个分开
+      console.log('value_split', value_split);
+      for (var i = 0; i < value_split.length; i++) {
+        valueAscii = valueAscii + value_split[i].charCodeAt().toString(16);     //转为Ascii字符后连接起
+      }
+      var value = valueAscii;
+      console.log('转为Ascii码值', value);
+      var write_function = that.write(value);     //调用数据发送函数
+      /* 成功发送的值的字节 */
+      if (that.data.send_string == true) {
+        var send_number_1 = that.data.send_number + valueInitial.length / 2;
+        var send_number = Math.floor(send_number_1);
+        that.setData({
+          send_number: send_number
+        });
+      } else {
+        var send_number_1 = that.data.send_number + valueInitial.length;
+        var send_number = Math.round(send_number_1);
+        that.setData({
+          send_number: send_number
+        })
+      }
+    }
+  },
+  write: function (str) {
+    var that = this;
+    var value = str;
+    console.log('value', value);
+    /* 将数值转为ArrayBuffer类型数据 */
+    var typedArray = new Uint8Array(value.match(/[\da-f]{2}/gi).map(function (h) {
+      return parseInt(h, 16)
+    }));
+    var buffer = typedArray.buffer;
     wx.writeBLECharacteristicValue({
       deviceId: that.data.deviceId,
       serviceId: that.data.serviceId,
-      characteristicId: that.data.cd20,
-      value: buffer1,
+      characteristicId: that.data.characteristicsId,
+      value: buffer,
       success: function (res) {
-        // success
-        console.log("success  指令发送成功");
-        console.log(res);
+        console.log('数据发送成功', res);
       },
       fail: function (res) {
-        // fail
-        console.log(res);
-      },
-      complete: function (res) {
-        // complete
+        console.log('调用失败', res);
+        /* 调用失败时，再次调用 */
+        wx.writeBLECharacteristicValue({
+          deviceId: that.data.deviceId,
+          serviceId: that.data.serviceId,
+          characteristicId: that.data.characteristicsId,
+          value: buffer,
+          success: function (res) {
+            console.log('第2次数据发送成功', res);
+          },
+          fail: function (res) {
+            console.log('第2次调用失败', res);
+            /* 调用失败时，再次调用 */
+            wx.writeBLECharacteristicValue({
+              deviceId: that.data.deviceId,
+              serviceId: that.data.serviceId,
+              characteristicId: that.data.characteristicsId,
+              value: buffer,
+              success: function (res) {
+                console.log('第3次数据发送成功', res);
+              },
+              fail: function (res) {
+                console.log('第3次调用失败', res);
+              }
+            });
+          }
+        });
       }
     });
   },
-  buf2hex: function (buffer) { // buffer is an ArrayBuffer
-    return Array.prototype.map.call(new Uint8Array(buffer), x => ('00' + x.toString(16)).slice(-2)).join('');
-  },
-
   //出错操作，直接返回上一层
   ifError: res => {
     //如果连接失败，返回上级列表

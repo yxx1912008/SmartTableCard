@@ -1,7 +1,7 @@
 {
   "pages": [
-    "pages/scanble/scanble",
     "pages/index/index",
+    "pages/scanble/scanble",
     "pages/conn/conn"
   ],
   "window": {
